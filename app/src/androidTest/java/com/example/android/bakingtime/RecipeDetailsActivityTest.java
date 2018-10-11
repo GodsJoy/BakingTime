@@ -30,8 +30,8 @@ public class RecipeDetailsActivityTest {
 
     @Test
     public void clickMenu_showDetails(){
-        //onView((withId(R.id.recipeTV))).perform(click());
-        //onData(anything()).inAdapterView(withId(R.id.recyclerview_recipe)).atPosition(0).perform(click());
+
+        //Got idea from here : https://guides.codepath.com/android/UI-Testing-with-Espresso
         onView(withId(R.id.recyclerview_recipe)).
                 perform(RecyclerViewActions.actionOnItemAtPosition(0, click()));
 
