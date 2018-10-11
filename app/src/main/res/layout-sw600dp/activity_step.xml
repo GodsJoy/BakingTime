@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <TextView
+            android:id="@+id/shortDescTV"
+            android:layout_width="match_parent"
+            android:layout_height="100dp"
+            android:paddingLeft="16dp"
+            android:gravity="center_vertical"
+            android:textSize="40sp"
+            android:background="@color/colorAccent"
+            android:textStyle="bold"
+            android:textColor="#ffffff"/>
+
+
+        <com.google.android.exoplayer2.ui.SimpleExoPlayerView
+            android:id="@+id/playerView"
+            android:layout_width="match_parent"
+            android:layout_height="230dp"
+            android:layout_marginBottom="8dp"
+            android:layout_marginLeft="8dp"
+            android:layout_marginRight="8dp"
+            android:layout_marginTop="8dp"
+            android:layout_below="@id/shortDescTV"/>
+
+
+        <TextView
+            android:id="@+id/descTV"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/playerView"
+            android:layout_marginTop="8dp"/>
+
+        <!--<Button
+            android:id="@+id/prevBTN"
+            android:layout_width="70dp"
+            android:layout_height="70dp"
+            android:layout_marginRight="8dp"
+            android:layout_marginLeft="32dp"
+            android:layout_marginBottom="16dp"
+            android:layout_marginTop="16dp"
+            android:text="Prev"
+            android:onClick="onClickPrev"
+            android:layout_below="@id/descTV"
+            android:background="@color/colorAccent"/>
+
+        <Button
+            android:id="@+id/nextBTN"
+            android:layout_width="70dp"
+            android:layout_height="70dp"
+            android:layout_marginRight="32dp"
+            android:layout_marginLeft="8dp"
+            android:layout_marginBottom="16dp"
+            android:layout_marginTop="16dp"
+            android:text="Next"
+            android:layout_alignParentRight="true"
+            android:layout_below="@id/descTV"
+            android:onClick="onClickNext"
+            android:background="@color/colorAccent"/>
+-->
+
+
+
+        <!--<View
+            android:id="@+id/divider"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:layout_below="@id/descTV"
+            android:layout_marginTop="16dp"
+            android:layout_marginLeft="16dp"
+            android:layout_marginRight="16dp"
+            android:background="#000000"/>-->
+
+    </RelativeLayout>
+</ScrollView>
