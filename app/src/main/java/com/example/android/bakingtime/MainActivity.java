@@ -1,6 +1,8 @@
 package com.example.android.bakingtime;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
@@ -10,14 +12,26 @@ import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
+import com.example.android.bakingtime.networking.RecipeServiceGenerator;
+import com.example.android.bakingtime.networking.Service;
 import com.example.android.bakingtime.utils.CreateRecipeFromJSON;
 import com.example.android.bakingtime.utils.Recipe;
 import com.example.android.bakingtime.utils.RecipeString;
+import com.google.gson.JsonArray;
+import com.google.gson.reflect.TypeToken;
+
+import java.lang.reflect.Type;
+import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class MainActivity extends AppCompatActivity implements RecipeAdapter.RecipeAdapterOnClickListener {
+    public static final int default_saved_recipe = -1;
+
     private Recipe [] allRecipe;
 
     @BindView(R.id.recyclerview_recipe) RecyclerView recyclerView;
@@ -29,6 +43,16 @@ public class MainActivity extends AppCompatActivity implements RecipeAdapter.Rec
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        //create shared preference
+        SharedPreferences sharedPref = getSharedPreferences(getString(R.string.shared_preference),Context.MODE_PRIVATE);
+        int saved_recipe = sharedPref.getInt(getString(R.string.recipe_pos), default_saved_recipe);
+
+        if(saved_recipe == default_saved_recipe) {
+            SharedPreferences.Editor editor = sharedPref.edit();
+            editor.putInt(getString(R.string.shared_preference), 0);
+            editor.commit();
+        }
 
         ButterKnife.bind(this);
 
@@ -47,17 +71,48 @@ public class MainActivity extends AppCompatActivity implements RecipeAdapter.Rec
         adapter = new RecipeAdapter(this, this);
         recyclerView.setAdapter(adapter);
 
-        allRecipe = CreateRecipeFromJSON.getEachRecipe(RecipeString.mRecipeString);
-        adapter.setRecipeData(allRecipe);
-        if(allRecipe == null)
+
+        getRecipeData();
+        //allRecipe = CreateRecipeFromJSON.getEachRecipe(RecipeString.mRecipeString);
+        //adapter.setRecipeData(allRecipe);
+        /*if(allRecipe == null)
             showErrorMessage();
         else {
 
             showRecipeData();
-        }
+        }*/
 
 
         Log.d("Test", "test");
+    }
+
+    private void getRecipeData(){
+        Service service = RecipeServiceGenerator.createRecipeService(Service.class);
+        Call<JsonArray> call = service.fetchBakingData();
+        call.enqueue(new Callback<JsonArray>() {
+            @Override
+            public void onResponse(Call<JsonArray> call, Response<JsonArray> response) {
+                if(response.isSuccessful()){
+                    if(response.body() != null){
+                        String arrayString = response.body().toString();
+                        allRecipe = CreateRecipeFromJSON.getEachRecipe(arrayString);
+                        adapter.setRecipeData(allRecipe);
+                        if(allRecipe == null)
+                            showErrorMessage();
+                        else {
+
+                            showRecipeData();
+                        }
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<JsonArray> call, Throwable t) {
+
+            }
+        });
+
     }
 
     //Launch DetailsActivity when recipe is clicked

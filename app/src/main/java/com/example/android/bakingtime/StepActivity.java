@@ -3,6 +3,7 @@ package com.example.android.bakingtime;
 import android.content.Intent;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -37,6 +38,13 @@ public class StepActivity extends AppCompatActivity {
     public static final String STEP_EXTRA_POS = "step_extra_pos";
     public static final int DEFAULT_POS = -1;
 
+    private final String PLAYER_POSITION = "player_position";
+    private final String PLAYER_STATE = "player_state";
+    private final String STEP_DATA = "step_data";
+    private final long default_position = -1;
+    private long playerPosition = default_position;
+    private boolean playWhenReady = true;
+
     private SimpleExoPlayer mExoPlayer;
 
     @BindView(R.id.playerView) SimpleExoPlayerView playerView;
@@ -52,6 +60,11 @@ public class StepActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_step);
+
+        if(savedInstanceState != null){
+            playerPosition = savedInstanceState.getLong(PLAYER_POSITION, default_position);
+            playWhenReady = savedInstanceState.getBoolean(PLAYER_STATE);
+        }
 
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
@@ -113,15 +126,19 @@ public class StepActivity extends AppCompatActivity {
             String userAgent = Util.getUserAgent(this, "bakingtime");
             MediaSource mediaSource = new ExtractorMediaSource(mediaUri, new DefaultDataSourceFactory(
                     this, userAgent), new DefaultExtractorsFactory(), null, null);
+            if(playerPosition != default_position)
+                mExoPlayer.seekTo(playerPosition);
             mExoPlayer.prepare(mediaSource);
-            mExoPlayer.setPlayWhenReady(true);
+            mExoPlayer.setPlayWhenReady(playWhenReady);
         }
     }
 
     private void releasePlayer(){
-        mExoPlayer.stop();
-        mExoPlayer.release();
-        mExoPlayer = null;
+        if(hasVideo && mExoPlayer != null) {
+            mExoPlayer.stop();
+            mExoPlayer.release();
+            mExoPlayer = null;
+        }
     }
 
     private void closeAndReportError(){
@@ -129,12 +146,12 @@ public class StepActivity extends AppCompatActivity {
         Toast.makeText(this, "Error encountered", Toast.LENGTH_SHORT);
     }
 
-    @Override
+    /*@Override
     protected void onDestroy() {
         super.onDestroy();
         if(hasVideo)
             releasePlayer();
-    }
+    }*/
 
     public void onClickNext(View view){
         Log.d("Next", "got to next");
@@ -170,5 +187,35 @@ public class StepActivity extends AppCompatActivity {
             nextBTN.setVisibility(View.VISIBLE);
             prevBTN.setVisibility(View.VISIBLE);
         }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if(hasVideo && mExoPlayer != null) {
+            playerPosition = mExoPlayer.getCurrentPosition();
+            playWhenReady = mExoPlayer.getPlayWhenReady();
+        }
+        if(Util.SDK_INT <= 23){
+            releasePlayer();
+        }
+
+
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if (Util.SDK_INT > 23) {
+            releasePlayer();
+        }
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putLong(PLAYER_POSITION, playerPosition);
+        outState.putBoolean(PLAYER_STATE, playWhenReady);
+
     }
 }

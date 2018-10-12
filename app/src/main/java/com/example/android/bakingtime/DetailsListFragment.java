@@ -31,6 +31,8 @@ import butterknife.ButterKnife;
  */
 public class DetailsListFragment extends Fragment{
 
+    private final String RECIPE_DATA = "recipe_data";
+
     private TextView ingredientTV;
 
     private RecyclerView stepsRecyclerView;
@@ -56,6 +58,8 @@ public class DetailsListFragment extends Fragment{
     public View onCreateView(@NonNull LayoutInflater inflater,
                              @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
+        if(savedInstanceState != null)
+            curentRecipe = savedInstanceState.getParcelable(RECIPE_DATA);
         parentActivity = (DetailsActivity) getActivity();
         parentActivity.setTitle(curentRecipe.getmName());
         final View rootView = inflater.inflate(R.layout.fragment_details_list, container, false);
@@ -94,7 +98,7 @@ public class DetailsListFragment extends Fragment{
 
 
 
-    public void populateBakingSteps(BakingStep[] steps, View root){
+    public void populateBakingSteps(BakingStep [] steps, View root){
         stepsRecyclerView = root.findViewById(R.id.recyclerview_steps);
         RecyclerView.LayoutManager layoutManager =
                 new GridLayoutManager(parentActivity, 1);
@@ -108,4 +112,9 @@ public class DetailsListFragment extends Fragment{
 
     }
 
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putParcelable(RECIPE_DATA, curentRecipe);
+    }
 }

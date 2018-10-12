@@ -1,6 +1,7 @@
 package com.example.android.bakingtime;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -36,6 +37,7 @@ public class RecipeAdapter extends RecyclerView.Adapter<RecipeAdapter.RecipeAdap
         int layoutID = R.layout.recipes_list;
         View view = LayoutInflater.from(parent.getContext()).inflate(layoutID, parent, false);
         return new RecipeAdapterViewHolder(view);
+
     }
 
     public class RecipeAdapterViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
@@ -58,6 +60,11 @@ public class RecipeAdapter extends RecyclerView.Adapter<RecipeAdapter.RecipeAdap
         recipeHolder.recipeTV.setText(allRecipes[position].getmName());
         recipeHolder.recipeTV.setBackgroundResource(R.color.colorAccent);
         recipeHolder.recipeTV.setId(position);
+        SharedPreferences sharedPreferences = mContent.getSharedPreferences
+                (mContent.getString(R.string.shared_preference), Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putInt(mContent.getString(R.string.recipe_pos), position);
+        editor.commit();
 
     }
 
@@ -73,4 +80,6 @@ public class RecipeAdapter extends RecyclerView.Adapter<RecipeAdapter.RecipeAdap
         allRecipes = recipes;
         notifyDataSetChanged();
     }
+
+
 }

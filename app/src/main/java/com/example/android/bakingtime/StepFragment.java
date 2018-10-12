@@ -34,6 +34,13 @@ import com.google.android.exoplayer2.util.Util;
  */
 public class StepFragment extends Fragment {
 
+    private final String PLAYER_POSITION = "player_position";
+    private final String PLAYER_STATE = "player_state";
+    private final String STEP_DATA = "step_data";
+    private final long default_position = -1;
+    private long playerPosition = default_position;
+    private boolean playWhenReady = true;
+
     private BakingStep mStep;
     private DetailsActivity mParentActivity;
     private SimpleExoPlayerView playerView;
@@ -56,7 +63,7 @@ public class StepFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater,
                              @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        Log.d("stepFrag", "Got here");
+
         final View rootView = inflater.inflate(R.layout.activity_step, container, false);
 
         shortDescTV = rootView.findViewById(R.id.shortDescTV);
@@ -65,6 +72,12 @@ public class StepFragment extends Fragment {
         prevBTN = rootView.findViewById(R.id.prevBTN);
         playerView = rootView.findViewById(R.id.playerView);
         mParentActivity = (DetailsActivity) getActivity();
+
+        if(savedInstanceState != null){
+            playerPosition = savedInstanceState.getLong(PLAYER_POSITION, default_position);
+            playWhenReady = savedInstanceState.getBoolean(PLAYER_STATE);
+            mStep = savedInstanceState.getParcelable(STEP_DATA);
+        }
         populateView();
         return rootView;
 
@@ -97,25 +110,55 @@ public class StepFragment extends Fragment {
             LoadControl loadControl = new DefaultLoadControl();
             mExoPlayer = ExoPlayerFactory.newSimpleInstance(mParentActivity, trackSelector, loadControl);
             playerView.setPlayer(mExoPlayer);
+
             String userAgent = Util.getUserAgent(mParentActivity, "bakingtime");
             MediaSource mediaSource = new ExtractorMediaSource(mediaUri, new DefaultDataSourceFactory(
                     mParentActivity, userAgent), new DefaultExtractorsFactory(), null, null);
+            if(playerPosition != default_position)
+                mExoPlayer.seekTo(playerPosition);
             mExoPlayer.prepare(mediaSource);
-            mExoPlayer.setPlayWhenReady(true);
+            mExoPlayer.setPlayWhenReady(playWhenReady);
         }
     }
 
     private void releasePlayer(){
-        mExoPlayer.stop();
-        mExoPlayer.release();
-        mExoPlayer = null;
+        if(hasVideo && mExoPlayer != null) {
+            mExoPlayer.stop();
+            mExoPlayer.release();
+            mExoPlayer = null;
+        }
+    }
+
+    /*@Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        releasePlayer();
+    }*/
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        if(hasVideo && mExoPlayer != null) {
+            playerPosition = mExoPlayer.getCurrentPosition();
+            playWhenReady = mExoPlayer.getPlayWhenReady();
+        }
+        if(Util.SDK_INT <= 23){
+            releasePlayer();
+        }
     }
 
     @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        if(hasVideo)
+    public void onStop() {
+        super.onStop();
+        if (Util.SDK_INT > 23) {
             releasePlayer();
+        }
     }
 
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        outState.putLong(PLAYER_POSITION, playerPosition);
+        outState.putBoolean(PLAYER_STATE, playWhenReady);
+        outState.putParcelable(STEP_DATA, mStep);
+    }
 }

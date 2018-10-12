@@ -13,10 +13,14 @@ import android.view.ViewGroup;
 
 import com.example.android.bakingtime.utils.Ingredient;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+
 /**
  * Created by ayomide on 10/2/18.
  */
 public class IngredientFragment extends Fragment {
+    private final String ING_DATA = "ing_data";
     private RecyclerView ingRecyclerView;
     private IngredientAdapter ingAdapter;
     private Ingredient [] ingredients;
@@ -32,22 +36,36 @@ public class IngredientFragment extends Fragment {
     public View onCreateView(@NonNull LayoutInflater inflater,
                              @Nullable ViewGroup container,
                              @Nullable Bundle savedInstanceState) {
-        Log.d("IngFrag", "Got here");
+        if(savedInstanceState != null) {
+            ArrayList<Ingredient> ingList = savedInstanceState.getParcelableArrayList(ING_DATA);
+            ingredients = new Ingredient[ingList.size()];
+            for(int i=0;i<ingList.size();i++)
+                ingredients[i] = ingList.get(i);
+
+        }
         final View rootView = inflater.inflate(R.layout.activity_ingredient, container, false);
         DetailsActivity parentActivity = (DetailsActivity) getActivity();
-        populateIng(ingredients, rootView, parentActivity);
+        populateIng(rootView, parentActivity);
         return rootView;
     }
 
-    public void populateIng(Ingredient[] ingredients, View view, DetailsActivity activity){
+    public void populateIng(View view, DetailsActivity activity){
         ingRecyclerView = view.findViewById(R.id.recyclerview_ingredients);
-        Log.d("RecyclerView null", ""+(ingRecyclerView == null)+(view == null));
         RecyclerView.LayoutManager layoutManager =
                 new GridLayoutManager(activity, 1);
         ingRecyclerView.setLayoutManager(layoutManager);
         ingRecyclerView.setHasFixedSize(true);
         ingAdapter = new IngredientAdapter(activity);
-        ingRecyclerView.setAdapter(ingAdapter);
         ingAdapter.setIngredientData(ingredients);
+        ingRecyclerView.setAdapter(ingAdapter);
+
+    }
+
+    @Override
+    public void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        //outState.putParcelableArray(ING_DATA, ingredients);
+        ArrayList<Ingredient> ingList = new ArrayList<>(Arrays.asList(ingredients));
+        outState.putParcelableArrayList(ING_DATA, ingList);
     }
 }

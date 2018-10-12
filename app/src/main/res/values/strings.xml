@@ -6,4 +6,6 @@
     <string name="step">Step: </string>
     <string name="appwidget_text">EXAMPLE</string>
     <string name="add_widget">Add widget</string>
+    <string name="shared_preference">shared_preference</string>
+    <string name="recipe_pos">recipe_pos</string>
 </resources>
