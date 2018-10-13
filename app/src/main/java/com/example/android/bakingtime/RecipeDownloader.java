@@ -17,6 +17,7 @@ import retrofit2.Response;
 
 /**
  * Created by ayomide on 10/13/18.
+ * Got idea from Tea Time lesson - Udacity
  */
 public class RecipeDownloader {
     private static final int DELAY_MILLIS = 3000;
