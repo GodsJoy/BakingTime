@@ -3,6 +3,10 @@ package com.example.android.bakingtime;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.annotation.VisibleForTesting;
+import android.support.test.espresso.IdlingResource;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
@@ -12,6 +16,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
+import com.example.android.bakingtime.IdlingResource.SimpleIdlingResource;
 import com.example.android.bakingtime.networking.RecipeServiceGenerator;
 import com.example.android.bakingtime.networking.Service;
 import com.example.android.bakingtime.utils.CreateRecipeFromJSON;
@@ -29,10 +34,15 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class MainActivity extends AppCompatActivity implements RecipeAdapter.RecipeAdapterOnClickListener {
+public class MainActivity extends AppCompatActivity
+        implements RecipeAdapter.RecipeAdapterOnClickListener,
+        RecipeDownloader.DelayerCallback{
     public static final int default_saved_recipe = -1;
 
     private Recipe [] allRecipe;
+
+    @Nullable
+    SimpleIdlingResource mIdlingResource;
 
     @BindView(R.id.recyclerview_recipe) RecyclerView recyclerView;
     private RecipeAdapter adapter;
@@ -70,9 +80,10 @@ public class MainActivity extends AppCompatActivity implements RecipeAdapter.Rec
 
         adapter = new RecipeAdapter(this, this);
         recyclerView.setAdapter(adapter);
+        getmIdlingResource();
 
 
-        getRecipeData();
+        //getRecipeData();
         //allRecipe = CreateRecipeFromJSON.getEachRecipe(RecipeString.mRecipeString);
         //adapter.setRecipeData(allRecipe);
         /*if(allRecipe == null)
@@ -81,23 +92,57 @@ public class MainActivity extends AppCompatActivity implements RecipeAdapter.Rec
 
             showRecipeData();
         }*/
+    }
 
+    @VisibleForTesting
+    @NonNull
+    public IdlingResource getmIdlingResource() {
+        if(mIdlingResource == null){
+            mIdlingResource = new SimpleIdlingResource();
+        }
+        return mIdlingResource;
+    }
 
-        Log.d("Test", "test");
+    @Override
+    protected void onStart() {
+        super.onStart();
+        RecipeDownloader.downloadRecipeString(this, MainActivity.this, mIdlingResource);
+    }
+
+    @Override
+    public void onCompleteDownload(String recipeString) {
+        allRecipe = CreateRecipeFromJSON.getEachRecipe(recipeString);
+        adapter.setRecipeData(allRecipe);
+        if(allRecipe == null)
+            showErrorMessage();
+        else {
+
+            showRecipeData();
+        }
     }
 
     private void getRecipeData(){
+        Recipe [] recipes1;
         Service service = RecipeServiceGenerator.createRecipeService(Service.class);
         Call<JsonArray> call = service.fetchBakingData();
         call.enqueue(new Callback<JsonArray>() {
+            Recipe [] recipes;
             @Override
             public void onResponse(Call<JsonArray> call, Response<JsonArray> response) {
                 if(response.isSuccessful()){
                     if(response.body() != null){
                         String arrayString = response.body().toString();
-                        allRecipe = CreateRecipeFromJSON.getEachRecipe(arrayString);
+                        /*allRecipe = CreateRecipeFromJSON.getEachRecipe(arrayString);
                         adapter.setRecipeData(allRecipe);
                         if(allRecipe == null)
+                            showErrorMessage();
+                        else {
+
+                            showRecipeData();
+                        }*/
+                        recipes = CreateRecipeFromJSON.getEachRecipe(arrayString);
+                        adapter.setRecipeData(recipes);
+                        if(recipes == null)
                             showErrorMessage();
                         else {
 
@@ -111,6 +156,8 @@ public class MainActivity extends AppCompatActivity implements RecipeAdapter.Rec
             public void onFailure(Call<JsonArray> call, Throwable t) {
 
             }
+
+
         });
 
     }

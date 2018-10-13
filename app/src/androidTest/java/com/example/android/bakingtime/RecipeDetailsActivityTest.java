@@ -1,9 +1,13 @@
 package com.example.android.bakingtime;
 
+import android.support.test.espresso.Espresso;
+import android.support.test.espresso.IdlingResource;
 import android.support.test.espresso.contrib.RecyclerViewActions;
 import android.support.test.rule.ActivityTestRule;
 import android.support.test.runner.AndroidJUnit4;
 
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -22,10 +26,18 @@ import static org.hamcrest.Matchers.anything;
  */
 @RunWith(AndroidJUnit4.class)
 public class RecipeDetailsActivityTest {
-    public static final String INGREDIENT_STR = "Ingredients";
+    private static final String INGREDIENT_STR = "Ingredients";
+
+    private IdlingResource mIdlingResource;
 
     @Rule public ActivityTestRule<MainActivity> mActivityTestRule =
             new ActivityTestRule<>(MainActivity.class);
+
+    @Before
+    public void registerIdlingResource(){
+        mIdlingResource = mActivityTestRule.getActivity().getmIdlingResource();
+        Espresso.registerIdlingResources(mIdlingResource);
+    }
 
     @Test
     public void clickMenu_showDetails(){
@@ -36,5 +48,12 @@ public class RecipeDetailsActivityTest {
 
         onView(withId(R.id.ingredientStr)).check(matches(withText(INGREDIENT_STR)));
 
+    }
+
+    @After
+    public void unRegisteridlingResource(){
+        if(mIdlingResource != null){
+            Espresso.unregisterIdlingResources(mIdlingResource);
+        }
     }
 }
