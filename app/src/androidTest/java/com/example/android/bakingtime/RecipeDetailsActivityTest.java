@@ -1,6 +1,7 @@
 package com.example.android.bakingtime;
 
 import android.support.test.espresso.Espresso;
+import android.support.test.espresso.IdlingRegistry;
 import android.support.test.espresso.IdlingResource;
 import android.support.test.espresso.contrib.RecyclerViewActions;
 import android.support.test.rule.ActivityTestRule;
@@ -36,7 +37,8 @@ public class RecipeDetailsActivityTest {
     @Before
     public void registerIdlingResource(){
         mIdlingResource = mActivityTestRule.getActivity().getmIdlingResource();
-        Espresso.registerIdlingResources(mIdlingResource);
+        //Espresso.registerIdlingResources(mIdlingResource);
+        IdlingRegistry.getInstance().register(mIdlingResource);
     }
 
     @Test
@@ -53,7 +55,8 @@ public class RecipeDetailsActivityTest {
     @After
     public void unRegisteridlingResource(){
         if(mIdlingResource != null){
-            Espresso.unregisterIdlingResources(mIdlingResource);
+            //Espresso.unregisterIdlingResources(mIdlingResource);
+            IdlingRegistry.getInstance().unregister(mIdlingResource);
         }
     }
 }

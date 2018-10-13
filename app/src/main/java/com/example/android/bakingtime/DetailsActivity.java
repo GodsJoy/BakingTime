@@ -78,6 +78,8 @@ public class DetailsActivity extends AppCompatActivity{
     public boolean onOptionsItemSelected(MenuItem item) {
         if(item.getItemId() == android.R.id.home){
             finish();
+            /*Intent intent = new Intent(DetailsActivity.this, MainActivity.class);
+            startActivity(intent);*/
             return true;
         }
         return super.onOptionsItemSelected(item);
