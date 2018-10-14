@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.util.Log;
+import android.view.View;
 import android.widget.RemoteViews;
 
 import com.example.android.bakingtime.networking.RecipeServiceGenerator;
@@ -15,6 +16,9 @@ import com.example.android.bakingtime.utils.CreateRecipeFromJSON;
 import com.example.android.bakingtime.utils.Ingredient;
 import com.example.android.bakingtime.utils.Recipe;
 import com.google.gson.JsonArray;
+
+import java.util.ArrayList;
+import java.util.Arrays;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -25,26 +29,34 @@ import retrofit2.Response;
  */
 public class BakingTimeWidgetProvider extends AppWidgetProvider {
 
+    public static final String WIDGET_RECIPE_EXTRA = "widget_recipe";
+    public static final String WIDGET_POSITION_EXTRA = "widget_position";
     static void updateAppWidget(Context context, AppWidgetManager appWidgetManager,
                                 int appWidgetId) {
         // Construct the RemoteViews object
-        RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.baking_time_widget_provider);
+
 
         SharedPreferences sharedPreferences = context.getSharedPreferences
                 (context.getString(R.string.shared_preference), Context.MODE_PRIVATE);
         int saved_recipe = sharedPreferences
                 .getInt(context.getString(R.string.recipe_pos), MainActivity.default_saved_recipe);
         if(saved_recipe == MainActivity.default_saved_recipe){
+            RemoteViews views = new RemoteViews(context.getPackageName(),
+                    R.layout.ingredient);
             //Launch MainActivity when the app is launched for the first time, since shared preference
             //is not yet set.
+            //views.setViewVisibility(R.id.recipe_widget_grid_view, View.INVISIBLE);
             Intent intent = new Intent(context, MainActivity.class);
             PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, 0);
-            views.setOnClickPendingIntent(R.id.cake_image, pendingIntent);
+            views.setTextViewText(R.id.ingredientTV, "Click for recipe");
+            views.setOnClickPendingIntent(R.id.ingredientTV, pendingIntent);
             // Instruct the widget manager to update the widget
             appWidgetManager.updateAppWidget(appWidgetId, views);
         }
         else{
-            Log.d("Service", "saved:"+saved_recipe);
+            //views.setViewVisibility(R.id.cake_image, View.INVISIBLE);
+            RemoteViews views = new RemoteViews(context.getPackageName(),
+                    R.layout.baking_time_widget_provider);
             getRecipeData(context, appWidgetManager, appWidgetId, views, saved_recipe);
             /*intent = new Intent(context, DetailsActivity.class);
             intent.putExtra(DetailsActivity.RECIPE_EXTRA, allRecipe[saved_recipe]);*/
@@ -69,12 +81,21 @@ public class BakingTimeWidgetProvider extends AppWidgetProvider {
                 if(response.isSuccessful()){
                     if(response.body() != null){
                         String arrayString = response.body().toString();
-                        Log.d("NetworkData", arrayString);
-                        Recipe [] allRecipe = CreateRecipeFromJSON.getEachRecipe(arrayString);
-                        Intent intent = new Intent(context, DetailsActivity.class);
-                        intent.putExtra(DetailsActivity.RECIPE_EXTRA, allRecipe[saved_recipe]);
-                        PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, 0);
-                        views.setOnClickPendingIntent(R.id.cake_image, pendingIntent);
+
+                        Intent intent = new Intent(context, GridViewWidgetService.class);
+
+                        //intent.putExtra(WIDGET_RECIPE_EXTRA, saved_recipe);
+                        //intent.putExtra(WIDGET_RECIPE_EXTRA, allRecipe[saved_recipe]);
+                        intent.putExtra(WIDGET_RECIPE_EXTRA, arrayString);
+                        intent.putExtra(WIDGET_POSITION_EXTRA, saved_recipe);
+                        views.setRemoteAdapter(R.id.recipe_widget_grid_view, intent);
+
+                        Intent intent2 = new Intent(context, DetailsActivity.class);
+                        //intent2.putExtra(DetailsActivity.RECIPE_EXTRA, allRecipe[saved_recipe]);
+                        PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent2, PendingIntent.FLAG_UPDATE_CURRENT);
+                        views.setPendingIntentTemplate(R.id.recipe_widget_grid_view, pendingIntent);
+                        views.setEmptyView(R.id.recipe_widget_grid_view, R.id.cake_image);
+
                         // Instruct the widget manager to update the widget
                         appWidgetManager.updateAppWidget(appWidgetId, views);
                     }
@@ -89,6 +110,7 @@ public class BakingTimeWidgetProvider extends AppWidgetProvider {
         });
 
     }
+
 
     @Override
     public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {

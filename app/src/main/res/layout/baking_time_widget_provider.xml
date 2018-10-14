@@ -3,11 +3,17 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <ImageView
+    <TextView
         android:id="@+id/cake_image"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:src="@drawable/cake"/>
+        android:text="No fav"/>
 
+    <GridView
+        android:id="@+id/recipe_widget_grid_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:numColumns="1"/>
 </LinearLayout>

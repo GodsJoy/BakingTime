@@ -58,6 +58,7 @@ public class IngredientAdapter extends RecyclerView.Adapter<IngredientAdapter.In
 
     public void setIngredientData(Ingredient [] ingredients){
         allIngredients = ingredients;
+        Log.d("ingdata", allIngredients.length+" length");
         notifyDataSetChanged();
     }
 
