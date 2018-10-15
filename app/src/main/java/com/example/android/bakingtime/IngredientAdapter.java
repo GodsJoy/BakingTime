@@ -10,7 +10,6 @@ import android.widget.TextView;
 
 import com.example.android.bakingtime.utils.Ingredient;
 
-import java.util.List;
 
 /**
  * Created by ayomide on 9/28/18.

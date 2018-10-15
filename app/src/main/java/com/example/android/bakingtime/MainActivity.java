@@ -1,5 +1,6 @@
 package com.example.android.bakingtime;
 
+
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -11,7 +12,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
@@ -20,13 +20,9 @@ import com.example.android.bakingtime.IdlingResource.SimpleIdlingResource;
 import com.example.android.bakingtime.networking.RecipeServiceGenerator;
 import com.example.android.bakingtime.networking.Service;
 import com.example.android.bakingtime.utils.CreateRecipeFromJSON;
+import com.example.android.bakingtime.utils.Ingredient;
 import com.example.android.bakingtime.utils.Recipe;
-import com.example.android.bakingtime.utils.RecipeString;
 import com.google.gson.JsonArray;
-import com.google.gson.reflect.TypeToken;
-
-import java.lang.reflect.Type;
-import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -58,9 +54,10 @@ public class MainActivity extends AppCompatActivity
         SharedPreferences sharedPref = getSharedPreferences(getString(R.string.shared_preference),Context.MODE_PRIVATE);
         int saved_recipe = sharedPref.getInt(getString(R.string.recipe_pos), default_saved_recipe);
 
+
         if(saved_recipe == default_saved_recipe) {
             SharedPreferences.Editor editor = sharedPref.edit();
-            editor.putInt(getString(R.string.shared_preference), 0);
+            editor.putInt(getString(R.string.recipe_pos), default_saved_recipe);
             editor.commit();
         }
 
@@ -164,7 +161,29 @@ public class MainActivity extends AppCompatActivity
 
     //Launch DetailsActivity when recipe is clicked
     @Override
-    public void onClick(Recipe recipe) {
+    public void onClick(Recipe recipe, int position) {
+        Ingredient [] ings = recipe.getIngredients();
+        //String [] ingStrings = new String[ings.length];
+        String ingString = "";
+        for(int i = 0; i<ings.length;i++){
+            ingString += ings[i].getnName()+" : " + ings[i].getmQty() + " " + ings[i].getmMeasure();
+            if(i < ings.length-1)
+                ingString+="////";
+        }
+
+        SharedPreferences sharedPreferences = getSharedPreferences
+                (getString(R.string.shared_preference), Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        //Set<String> set = new HashSet<>(Arrays.asList(ingStrings));
+        editor.putInt(getString(R.string.recipe_pos), position);
+        editor.putString(getString(R.string.selected_ingredients), ingString);
+        Log.d("SharedPos", ingString);
+
+        editor.commit();
+
+        FavoriteRecipeService.startActionUpdateRecipeWidget(this);
+        //Log.d("Check broadcast", ingStrings.length +" set: "+set.size()+ " pos in rec adapter");
+
         Intent intent = new Intent(MainActivity.this, DetailsActivity.class);
         intent.putExtra(DetailsActivity.RECIPE_EXTRA, recipe);
         startActivity(intent);

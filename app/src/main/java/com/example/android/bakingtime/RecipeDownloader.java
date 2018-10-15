@@ -7,8 +7,6 @@ import android.support.annotation.Nullable;
 import com.example.android.bakingtime.IdlingResource.SimpleIdlingResource;
 import com.example.android.bakingtime.networking.RecipeServiceGenerator;
 import com.example.android.bakingtime.networking.Service;
-import com.example.android.bakingtime.utils.CreateRecipeFromJSON;
-import com.example.android.bakingtime.utils.Recipe;
 import com.google.gson.JsonArray;
 
 import retrofit2.Call;

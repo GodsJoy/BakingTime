@@ -1,23 +1,14 @@
 package com.example.android.bakingtime;
 
 import android.content.Intent;
-import android.net.Uri;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.GridLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.MenuItem;
-import android.widget.TextView;
 import android.widget.Toast;
 
-
-import com.example.android.bakingtime.utils.BakingStep;
-import com.example.android.bakingtime.utils.Ingredient;
 import com.example.android.bakingtime.utils.Recipe;
-import com.google.android.exoplayer2.SimpleExoPlayer;
-import com.google.android.exoplayer2.ui.SimpleExoPlayerView;
 
 public class DetailsActivity extends AppCompatActivity{
 

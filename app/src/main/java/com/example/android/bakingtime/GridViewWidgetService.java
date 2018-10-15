@@ -1,26 +1,10 @@
 package com.example.android.bakingtime;
 
-import android.app.PendingIntent;
-import android.appwidget.AppWidgetManager;
 import android.content.Context;
 import android.content.Intent;
-import android.os.Bundle;
-import android.util.Log;
+import android.content.SharedPreferences;
 import android.widget.RemoteViews;
 import android.widget.RemoteViewsService;
-
-import com.example.android.bakingtime.networking.RecipeServiceGenerator;
-import com.example.android.bakingtime.networking.Service;
-import com.example.android.bakingtime.utils.CreateRecipeFromJSON;
-import com.example.android.bakingtime.utils.Ingredient;
-import com.example.android.bakingtime.utils.Recipe;
-import com.google.gson.JsonArray;
-
-import java.util.ArrayList;
-
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 /**
  * Created by ayomide on 10/13/18.
@@ -28,26 +12,34 @@ import retrofit2.Response;
 public class GridViewWidgetService extends RemoteViewsService {
     @Override
     public RemoteViewsFactory onGetViewFactory(Intent intent) {
-        String recipeString =
-                intent.getStringExtra(BakingTimeWidgetProvider.WIDGET_RECIPE_EXTRA);
-        int position = intent.getIntExtra(BakingTimeWidgetProvider.WIDGET_POSITION_EXTRA, -1);
-        //Recipe recipe = intent.getParcelableExtra(BakingTimeWidgetProvider.WIDGET_RECIPE_EXTRA);
-        Log.d("GridService", "values of "+(recipeString == null)+position);
-        //return new GridRemoteViewFactory(this.getApplicationContext(), recipe.getIngredients());
-        return new GridRemoteViewFactory(this.getApplicationContext(), recipeString, position);
+
+        return new GridRemoteViewFactory(this.getApplicationContext());
     }
 }
 
 class GridRemoteViewFactory implements RemoteViewsService.RemoteViewsFactory{
     private Context mContext;
-    private Ingredient [] mIngredients;
-    private Recipe recipe;
+    private String [] ingredients;
 
-    public GridRemoteViewFactory(Context context, String recipeString, int position){
+    public GridRemoteViewFactory(Context context){
         mContext = context;
+        /*int i = 0;
+        SharedPreferences sharedPreferences = mContext.getSharedPreferences
+                (mContext.getString(R.string.shared_preference), Context.MODE_PRIVATE);
+
+        Set<String> set1 = new HashSet<>(Arrays.asList(new String [0]));
+        Set<String> set2 = sharedPreferences
+                .getStringSet(mContext.getString(R.string.selected_ingredients), set1);
+        //int position = intent.getIntExtra(BakingTimeWidgetProvider.WIDGET_POSITION_EXTRA, -1);
+        ingredients = new String[set2.size()];
+        for(String s:set2){
+            ingredients[i] = s;
+            i++;
+        }*/
+
         //mPosition = position;
-        recipe = CreateRecipeFromJSON.getEachRecipe(recipeString)[position];
-        mIngredients = recipe.getIngredients();
+        //recipe = CreateRecipeFromJSON.getEachRecipe(recipeString)[position];
+        //mIngredients = recipe.getIngredients();
         //getRecipeData();
     }
 
@@ -59,8 +51,20 @@ class GridRemoteViewFactory implements RemoteViewsService.RemoteViewsFactory{
 
     @Override
     public void onDataSetChanged() {
-        //values = getValues();
-        //getRecipeData();
+        int i = 0;
+        SharedPreferences sharedPreferences = mContext.getSharedPreferences
+                (mContext.getString(R.string.shared_preference), Context.MODE_PRIVATE);
+
+        //Set<String> set1 = new HashSet<>(Arrays.asList(new String [0]));
+        String ingString = sharedPreferences
+                .getString(mContext.getString(R.string.selected_ingredients), "");
+        //int position = intent.getIntExtra(BakingTimeWidgetProvider.WIDGET_POSITION_EXTRA, -1);
+        ingredients = ingString.split("////");
+        //Log.d("Ondatachanged", ingredients.length+" leng");
+        /*for(String s:set2){
+            ingredients[i] = s;
+            i++;
+        }*/
     }
 
     @Override
@@ -70,25 +74,25 @@ class GridRemoteViewFactory implements RemoteViewsService.RemoteViewsFactory{
 
     @Override
     public int getCount() {
-        if(mIngredients == null)
+        if(ingredients == null)
             return 0;
-        return mIngredients.length;
+        return ingredients.length;
     }
 
     @Override
     public RemoteViews getViewAt(int position) {
-        Ingredient ing = mIngredients[position];
+        //Ingredient ing = mIngredients[position];
         RemoteViews views = new RemoteViews(mContext.getPackageName(), R.layout.ingredient);
-        String ingText = (position+1)+". "+ing.getnName()+" : " + ing.getmQty() + " " + ing.getmMeasure();
+        String ingText = (position+1)+". "+ingredients[position];
         views.setTextViewText(R.id.ingredientTV, ingText);
 
-        Bundle extras = new Bundle();
+        /*Bundle extras = new Bundle();
         extras.putParcelable(DetailsActivity.RECIPE_EXTRA, recipe);
         //extras.putLong(PlantDetailActivity.EXTRA_PLANT_ID, id);
         Intent fillInIntent = new Intent();
         fillInIntent.putExtras(extras);
         views.setOnClickFillInIntent(R.id.ingredientTV, fillInIntent);
-        //Log.d("getViewsAt", "in getvies");
+        //Log.d("getViewsAt", "in getvies");*/
         return views;
 
     }

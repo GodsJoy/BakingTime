@@ -1,7 +1,6 @@
 package com.example.android.bakingtime;
 
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -11,7 +10,6 @@ import android.widget.TextView;
 
 import com.example.android.bakingtime.utils.Recipe;
 
-import java.util.List;
 
 /**
  * Created by ayomide on 9/26/18.
@@ -24,7 +22,7 @@ public class RecipeAdapter extends RecyclerView.Adapter<RecipeAdapter.RecipeAdap
     private final RecipeAdapterOnClickListener mClickListener;
 
     public interface RecipeAdapterOnClickListener{
-        void onClick(Recipe recipe);
+        void onClick(Recipe recipe, int position);
     }
 
     public RecipeAdapter(@NonNull Context mContent, RecipeAdapterOnClickListener mClickListener) {
@@ -51,7 +49,7 @@ public class RecipeAdapter extends RecyclerView.Adapter<RecipeAdapter.RecipeAdap
 
         public void onClick(View v){
             int adapterPos = getAdapterPosition();
-            mClickListener.onClick(allRecipes[adapterPos]);
+            mClickListener.onClick(allRecipes[adapterPos], adapterPos);
         }
     }
 
@@ -60,11 +58,7 @@ public class RecipeAdapter extends RecyclerView.Adapter<RecipeAdapter.RecipeAdap
         recipeHolder.recipeTV.setText(allRecipes[position].getmName());
         recipeHolder.recipeTV.setBackgroundResource(R.color.colorAccent);
         recipeHolder.recipeTV.setId(position);
-        SharedPreferences sharedPreferences = mContent.getSharedPreferences
-                (mContent.getString(R.string.shared_preference), Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putInt(mContent.getString(R.string.recipe_pos), position);
-        editor.commit();
+
 
     }
 
